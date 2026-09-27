@@ -789,7 +789,7 @@ document.addEventListener("mousemove", e => {
   ) return;
 
   // Moving the mouse right turns the camera right.
-  yaw += e.movementX * .0022;
+  yaw -= e.movementX * .0022;
 
   pitch = THREE.MathUtils.clamp(
     pitch - e.movementY * .0022,
@@ -940,8 +940,8 @@ function tick(dt, now) {
   if (!run?.started || run.paused || run.dead) return;
 
   // Arrow keys use the same turning directions as the mouse.
-  if (keys.ArrowLeft) yaw -= dt * 1.9;
-  if (keys.ArrowRight) yaw += dt * 1.9;
+  if (keys.ArrowLeft) yaw += dt * 1.9;
+  if (keys.ArrowRight) yaw -= dt * 1.9;
 
   if (keys.ArrowUp) {
     pitch = Math.min(1.35, pitch + dt * 1.4);
