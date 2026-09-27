@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Threshold Hotel — Phase 1</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div id="game" aria-label="First-person 3D game"></div>
+
+  <div id="hud" class="hidden">
+    <div id="stats"></div>
+    <div id="message" role="status" aria-live="polite"></div>
+    <div id="prompt"></div>
+    <div id="crosshair" aria-hidden="true">+</div>
+    <div id="danger" aria-hidden="true"></div>
+  </div>
+
+  <div id="overlay">
+    <main class="panel">
+      <h1 id="title">Threshold Hotel</h1>
+      <p id="description">
+        An original, unofficial browser horror-game prototype.
+        Open numbered doors, collect gold, and use wardrobes when the lights warn you.
+      </p>
+      <label for="seed">Run seed</label>
+      <input id="seed" type="text" maxlength="40" spellcheck="false">
+      <div class="buttons">
+        <button id="start">Start run</button>
+        <button id="resume" class="hidden">Resume</button>
+        <button id="restart" class="hidden">Restart same seed</button>
+      </div>
+      <details open>
+        <summary>Controls and settings</summary>
+        <p>WASD move · Mouse look · Shift sprint · C crouch · E interact / leave wardrobe · Esc pause. Arrow keys can also turn and look when mouse capture is unavailable.</p>
+        <label for="volume">Sound volume <span id="volumeValue">35%</span></label>
+        <input id="volume" type="range" min="0" max="100" value="35">
+        <label for="quality">Rendering</label>
+        <select id="quality">
+          <option value="low">Low</option>
+          <option value="high" selected>High — shadows</option>
+        </select>
+      </details>
+      <p class="small">Desktop keyboard recommended. No downloaded artwork or audio assets.</p>
+    </main>
+  </div>
+
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
