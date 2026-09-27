@@ -788,10 +788,10 @@ document.addEventListener("mousemove", e => {
     run?.paused
   ) return;
 
-  yaw += e.movementX * .0022;
+  yaw += e.movementY * .0022;
 
   pitch = THREE.MathUtils.clamp(
-    pitch - e.movementY * .0022,
+    pitch - e.movementX * .0022,
     -1.35,
     1.35
   );
@@ -939,11 +939,11 @@ function advanceThreat(dt, now) {
 function tick(dt, now) {
   if (!run?.started || run.paused || run.dead) return;
 
-  // Arrow keys use the same turning directions as the mouse.
-  if (keys.ArrowLeft) yaw -= dt * 1.9;
-  if (keys.ArrowRight) yaw += dt * 1.9;
+  //  keys use the same turning directions as the mouse.
+  if (keys.Right) yaw -= dt * 1.9;
+  if (keys.Left) yaw += dt * 1.9;
 
-  if (keys.ArrowUp) {
+  if (keys.Up) {
     pitch = Math.min(1.35, pitch + dt * 1.4);
   }
 
