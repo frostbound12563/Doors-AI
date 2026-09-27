@@ -269,7 +269,6 @@ function makeRoom(i) {
 
   block(group, mats.gold, 0, 4.19, z, 1.1, .08, .9);
 
-  // Two reachable wardrobes per room.
   for (const [side, offset] of [[-1, -4], [1, 3.8]]) {
     const x = side * 4.14;
     const cz = z + offset;
@@ -623,6 +622,7 @@ function hurt(amount, reason) {
   if (run.health === 0) {
     run.dead = true;
     run.paused = true;
+    keys = Object.create(null);
     document.exitPointerLock?.();
 
     title.textContent = "Run ended";
@@ -638,6 +638,8 @@ function hurt(amount, reason) {
 }
 
 function start() {
+  keys = Object.create(null);
+
   for (const room of rooms.values()) {
     scene.remove(room.group);
   }
@@ -669,8 +671,6 @@ function start() {
     screechChecked: new Set()
   };
 
-  // Start facing the positive-Z doorway. Three.js cameras face negative Z
-  // at yaw zero, so the initial yaw must be PI.
   yaw = Math.PI;
   pitch = 0;
 
@@ -691,6 +691,7 @@ function start() {
 function pause() {
   if (!run?.started || run.dead) return;
 
+  keys = Object.create(null);
   run.paused = true;
   title.textContent = "Paused";
   description.textContent =
@@ -705,6 +706,7 @@ function pause() {
 function resume() {
   if (!run || run.dead) return;
 
+  keys = Object.create(null);
   run.paused = false;
   overlay.classList.add("hidden");
   renderer.domElement.requestPointerLock?.();
@@ -770,25 +772,21 @@ document.addEventListener("mousemove", e => {
 });
 
 document.addEventListener("keydown", e => {
-  if ([
+  if (!run?.started || run.paused || run.dead) return;
+
+  const gameKeys = [
     "KeyW", "KeyA", "KeyS", "KeyD", "KeyE", "KeyC",
     "ShiftLeft", "ArrowLeft", "ArrowRight",
     "ArrowUp", "ArrowDown", "Space"
-  ].includes(e.code)) {
-    e.preventDefault();
-  }
+  ];
+
+  if (gameKeys.includes(e.code)) e.preventDefault();
 
   keys[e.code] = true;
 
   if (e.code === "KeyE" && !e.repeat) interact();
 
-  if (
-    e.code === "Escape" &&
-    run?.started &&
-    !run.paused
-  ) {
-    pause();
-  }
+  if (e.code === "Escape") pause();
 });
 
 document.addEventListener("keyup", e => {
@@ -796,6 +794,7 @@ document.addEventListener("keyup", e => {
 });
 
 window.addEventListener("blur", () => {
+  keys = Object.create(null);
   if (run?.started && !run.paused) pause();
 });
 
@@ -938,8 +937,6 @@ function tick(dt, now) {
       keys.ShiftLeft ? 6 :
       3.65;
 
-    // Movement now follows the camera's actual facing direction.
-    // W is forward; S is backward.
     const nx = camera.position.x +
       (
         (
