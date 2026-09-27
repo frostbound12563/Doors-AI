@@ -945,10 +945,12 @@ function tick(dt, now) {
         ) / length
       ) * dt * speed;
 
+    // The minus sign on the strafe term keeps A/D sideways
+    // relative to the camera after turning.
     const nz = camera.position.z +
       (
         (
-          -Math.cos(yaw) * forward +
+          -Math.cos(yaw) * forward -
           Math.sin(yaw) * strafe
         ) / length
       ) * dt * speed;
