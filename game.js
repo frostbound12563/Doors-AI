@@ -12,7 +12,13 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x09070b);
 scene.fog = new THREE.Fog(0x09070b, 17, 43);
 
-const camera = new THREE.PerspectiveCamera(74, innerWidth / innerHeight, .07, 75);
+const camera = new THREE.PerspectiveCamera(
+  74,
+  innerWidth / innerHeight,
+  .07,
+  75
+);
+
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
@@ -31,8 +37,16 @@ const mats = {
   ceiling: new THREE.MeshStandardMaterial({ color: 0x69585a, roughness: 1 }),
   wood: new THREE.MeshStandardMaterial({ color: 0x684232, roughness: .85 }),
   darkWood: new THREE.MeshStandardMaterial({ color: 0x38251f, roughness: .9 }),
-  gold: new THREE.MeshStandardMaterial({ color: 0xe5b846, metalness: .75, roughness: .25 }),
-  key: new THREE.MeshStandardMaterial({ color: 0xf2d890, metalness: .65, roughness: .3 }),
+  gold: new THREE.MeshStandardMaterial({
+    color: 0xe5b846,
+    metalness: .75,
+    roughness: .25
+  }),
+  key: new THREE.MeshStandardMaterial({
+    color: 0xf2d890,
+    metalness: .65,
+    roughness: .3
+  }),
   black: new THREE.MeshStandardMaterial({ color: 0x101015, roughness: 1 }),
   eye: new THREE.MeshBasicMaterial({ color: 0xffd1b6 }),
   rush: new THREE.MeshBasicMaterial({ color: 0x181726 }),
@@ -81,7 +95,11 @@ function text(parent, value, x, y, z, size = 72) {
 
 function hash(str) {
   let h = 2166136261;
-  for (const c of str) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+
+  for (const c of str) {
+    h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  }
+
   return h >>> 0;
 }
 
@@ -215,9 +233,11 @@ function makeRoom(i) {
   const rand = rngFor(i);
   const group = new THREE.Group();
   const z = i * 20;
+
   const type = ["hall", "lounge", "study", "gallery"][
     Math.floor(rand() * 4)
   ];
+
   const isDark = i > 1 && rand() < .22;
   const locked = i > 2 && rand() < .23;
 
@@ -261,6 +281,7 @@ function makeRoom(i) {
     room.lightBase,
     13
   );
+
   lamp.position.set(0, 3.9, z);
   lamp.castShadow = quality.value === "high" && i % 2 === 0;
   lamp.shadow.mapSize.set(256, 256);
@@ -328,6 +349,7 @@ function makeRoom(i) {
 
   if (i > 0 && rand() < .78) {
     const value = rand() < .65 ? 5 : 10;
+
     addPickup(
       room,
       "coin",
@@ -671,6 +693,8 @@ function start() {
     screechChecked: new Set()
   };
 
+  // Three.js cameras face negative Z at yaw zero.
+  // PI makes the player start facing the doorway at positive Z.
   yaw = Math.PI;
   pitch = 0;
 
@@ -722,6 +746,7 @@ $("volume").oninput = () => {
 
 $("quality").onchange = () => {
   renderer.shadowMap.enabled = quality.value === "high";
+
   renderer.setPixelRatio(
     Math.min(
       devicePixelRatio,
@@ -763,7 +788,9 @@ document.addEventListener("mousemove", e => {
     run?.paused
   ) return;
 
-  yaw -= e.movementX * .0022;
+  // Moving the mouse right turns the camera right.
+  yaw += e.movementX * .0022;
+
   pitch = THREE.MathUtils.clamp(
     pitch - e.movementY * .0022,
     -1.35,
@@ -785,7 +812,6 @@ document.addEventListener("keydown", e => {
   keys[e.code] = true;
 
   if (e.code === "KeyE" && !e.repeat) interact();
-
   if (e.code === "Escape") pause();
 });
 
@@ -803,6 +829,7 @@ function advanceThreat(dt, now) {
   if (!t) return;
 
   const lamp = rooms.get(t.room)?.lamp;
+
   if (lamp) {
     lamp.intensity =
       Math.sin(now * .035) > .1 ? .06 : 1.8;
@@ -854,10 +881,13 @@ function advanceThreat(dt, now) {
 
     const fraction = Math.min(1, t.elapsed / 2.65);
     const forward = t.completed % 2 === 0;
+
     const z = t.room * 20 +
-      (forward
-        ? -11 + 26 * fraction
-        : 15 - 26 * fraction);
+      (
+        forward
+          ? -11 + 26 * fraction
+          : 15 - 26 * fraction
+      );
 
     run.threatMesh.position.set(0, 1.75, z);
     run.threatMesh.rotation.y =
@@ -884,6 +914,7 @@ function advanceThreat(dt, now) {
         run.threat = null;
 
         if (lamp) lamp.intensity = .24;
+
         if (!run.dead) {
           say(`${t.type} has passed.`, 1.6);
         }
@@ -908,11 +939,14 @@ function advanceThreat(dt, now) {
 function tick(dt, now) {
   if (!run?.started || run.paused || run.dead) return;
 
-  if (keys.ArrowLeft) yaw += dt * 1.9;
-  if (keys.ArrowRight) yaw -= dt * 1.9;
+  // Arrow keys use the same turning directions as the mouse.
+  if (keys.ArrowLeft) yaw -= dt * 1.9;
+  if (keys.ArrowRight) yaw += dt * 1.9;
+
   if (keys.ArrowUp) {
     pitch = Math.min(1.35, pitch + dt * 1.4);
   }
+
   if (keys.ArrowDown) {
     pitch = Math.max(-1.35, pitch - dt * 1.4);
   }
@@ -937,16 +971,15 @@ function tick(dt, now) {
       keys.ShiftLeft ? 6 :
       3.65;
 
+    // Forward and sideways movement match the camera's yaw.
     const nx = camera.position.x +
       (
         (
-          Math.sin(yaw) * forward +
+          -Math.sin(yaw) * forward +
           Math.cos(yaw) * strafe
         ) / length
       ) * dt * speed;
 
-    // The minus sign on the strafe term keeps A/D sideways
-    // relative to the camera after turning.
     const nz = camera.position.z +
       (
         (
@@ -1013,6 +1046,7 @@ function tick(dt, now) {
       run.hideBlock = 7;
 
       camera.position.copy(run.preHide);
+
       hurt(
         40,
         "Hide forced you out. Wardrobes are briefly unavailable."
@@ -1046,6 +1080,7 @@ function tick(dt, now) {
     const target = new THREE.Vector3();
 
     camera.getWorldDirection(dir);
+
     target.subVectors(
       s.mesh.position,
       camera.position
@@ -1065,6 +1100,7 @@ function tick(dt, now) {
 
       if (s.time <= 0) {
         clearScreech();
+
         hurt(
           40,
           "Screech bit you. Turn toward the 'psst' next time."
